@@ -1,5 +1,7 @@
 'use client';
 import CustomButton from './CustomButton';
+import Image from 'next/image';
+import CarImage from '../../../public/hero.png';
 
 const Hero = () => {
   const handleScroll = () => {
@@ -20,7 +22,10 @@ const Hero = () => {
           handleClick={handleScroll}
         />
         <div className="hero__image-container">
-          <div className="hero__image"></div>
+          <div className="hero__image">
+            <Image src={CarImage} alt="hero" fill className="object-contain" />
+            <div className="hero__image-overlay" />
+          </div>
         </div>
       </div>
     </div>

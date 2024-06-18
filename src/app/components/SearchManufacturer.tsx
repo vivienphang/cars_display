@@ -1,6 +1,6 @@
 'use client';
 import Image from 'next/image';
-import { useState } from 'react';
+import { useState, Fragment } from 'react';
 import { SearchManufacturerProps } from '../types';
 import {
   Combobox,
@@ -8,8 +8,12 @@ import {
   ComboboxOption,
   ComboboxOptions,
   ComboboxButton,
+  Transition,
 } from '@headlessui/react';
 import CarLogo from '../../../public/car-logo.svg';
+import { manufacturers } from '../constants';
+import clsx from 'clsx';
+import { CheckIcon } from '@heroicons/react/20/solid';
 
 const SearchManufacturer = ({
   manufacturer,
@@ -17,9 +21,21 @@ const SearchManufacturer = ({
 }: SearchManufacturerProps) => {
   const [query, setQuery] = useState('');
 
+  // Get list of manufacturers and filter
+  const regexEx = /s+/g;
+  const filteredManufacturers =
+    query === ' '
+      ? manufacturers
+      : manufacturers.filter((item) =>
+          item
+            .toLowerCase()
+            .replace(regexEx, '')
+            .includes(query.toLowerCase().replace(regexEx, ''))
+        );
+
   return (
     <div className="search-manufacturer">
-      <Combobox>
+      <Combobox value={manufacturer} onChange={setManufacturer}>
         <div className="relative w-full">
           <ComboboxButton className="absolute top-[14px]">
             <Image
@@ -36,6 +52,40 @@ const SearchManufacturer = ({
             displayValue={(manufacturer: string) => manufacturer}
             onChange={(e) => setQuery(e.target.value)}
           />
+
+          <Transition
+            as={Fragment}
+            leave="transition ease-in duration-100"
+            leaveFrom="opacity-100"
+            leaveTo="opacity-0"
+            afterLeave={() => setQuery('')}
+          >
+            <ComboboxOptions>
+              {filteredManufacturers.map((item) => (
+                <ComboboxOption key={item} value={item}>
+                  {({ focus, selected }) => (
+                    <div
+                      className={clsx(
+                        'relative search-manufacturer__option',
+                        focus ? 'bg-primary-blue text-white' : 'text-gray-900'
+                      )}
+                    >
+                      <span
+                        style={{
+                          display: 'flex',
+                          alignItems: 'center',
+                          gap: '8px',
+                        }}
+                      >
+                        {selected && <CheckIcon className="size-4" />}
+                        {item}
+                      </span>
+                    </div>
+                  )}
+                </ComboboxOption>
+              ))}
+            </ComboboxOptions>
+          </Transition>
         </div>
       </Combobox>
     </div>

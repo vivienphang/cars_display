@@ -1,12 +1,47 @@
+'use client';
 import Image from 'next/image';
 import { Hero, CustomFilter, SearchBar, CarCard } from './components';
 import { fetchCars } from './utils';
+import { useEffect, useState } from 'react';
 
-export default async function Home() {
-  const allCars = await fetchCars();
+export default function Home() {
+  const [allCars, setAllCars] = useState([]);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState(null);
+
+  useEffect(() => {
+    async function fetchData() {
+      try {
+        const cars = await fetchCars();
+        setAllCars(cars);
+      } catch (error: any) {
+        setError(error.message || 'An error occurred');
+      } finally {
+        setLoading(false);
+      }
+    }
+
+    fetchData();
+  }, [allCars]);
 
   // Check if data is empty
-  const isDataEmpty = !Array.isArray(allCars) || allCars.length < 1 || !allCars;
+  const isDataEmpty = !Array.isArray(allCars) || allCars.length < 1;
+
+  if (loading) {
+    return <div>Loading...</div>;
+  }
+
+  if (error) {
+    return (
+      <div className="home__error-container">
+        <h2 className="text-black text-xl font-bold">
+          Oops, an error occurred!
+        </h2>
+        <p>{error}</p>
+      </div>
+    );
+  }
+
   return (
     <main className="overflow-hidden">
       <Hero />
@@ -28,13 +63,14 @@ export default async function Home() {
         {!isDataEmpty ? (
           <section>
             <div className="home__cars-wrapper">
-              {allCars?.map((car, index) => <CarCard key={index} car={car} />)}
+              {allCars.map((car, index) => (
+                <CarCard key={index} car={car} />
+              ))}
             </div>
           </section>
         ) : (
           <div className="home__error-container">
             <h2 className="text-black text-xl font-bold">Oops, no results!</h2>
-            <p>{allCars?.message}</p>
           </div>
         )}
       </div>
